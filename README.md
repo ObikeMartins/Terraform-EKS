@@ -20,7 +20,7 @@ Creating an Elastic Kubernetes Service (EKS) Cluster on AWS using Terraform can 
    This file will contain the main configuration for your EKS cluster.
    ```hcl
    provider "aws" {
-     region = "us-west-2"  # Change this to your preferred region
+     region = "us-east-1"  # Change this to your preferred region
    }
 
    module "vpc" {
