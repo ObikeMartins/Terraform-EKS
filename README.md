@@ -25,14 +25,17 @@ Creating an Elastic Kubernetes Service (EKS) Cluster on AWS using Terraform can 
 
    module "vpc" {
      source  = "terraform-aws-modules/vpc/aws"
-     version = "3.14.0"
+     version = "5.0.0"  # ✅ Upgrade to the latest version
 
-     name = "my-vpc"
+     name = "martins-vpc"
      cidr = "10.0.0.0/16"
 
-     azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
+     azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
      public_subnets  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
      private_subnets = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+     enable_nat_gateway = true  # ✅ Ensure NAT Gateway is enabled if needed
+     enable_vpn_gateway = false # ✅ Disable VPN Gateway if not needed
 
      tags = {
        Terraform = "true"
@@ -42,18 +45,21 @@ Creating an Elastic Kubernetes Service (EKS) Cluster on AWS using Terraform can 
 
    module "eks" {
      source          = "terraform-aws-modules/eks/aws"
+     version         = "19.20.0"  # Use the latest stable version
      cluster_name    = "my-cluster"
-     cluster_version = "1.21"
-     subnets         = module.vpc.private_subnets
-     vpc_id          = module.vpc.vpc_id
+     cluster_version = "1.27"  # Upgrade EKS version
+
+     vpc_id     = module.vpc.vpc_id
+     subnet_ids = module.vpc.private_subnets  # ✅ Corrected argument
+
 
      node_groups = {
        eks_nodes = {
-         desired_capacity = 2
-         max_capacity     = 3
-         min_capacity     = 1
+        min_size       = 1
+        max_size       = 3
+        desired_capacity = 1
+        instance_type = "t3.medium"
 
-         instance_type = "t3.medium"
        }
      }
 
@@ -89,7 +95,7 @@ Creating an Elastic Kubernetes Service (EKS) Cluster on AWS using Terraform can 
    variable "region" {
      description = "The AWS region to deploy to."
      type        = string
-     default     = "us-west-2"
+     default     = "us-east-1"
    }
    ```
 
